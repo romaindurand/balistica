@@ -22,4 +22,4 @@ rotation = -0.36804268
 shape = SubResource("CapsuleShape2D_yqjtg")
 
 [node name="Player" parent="." unique_id=1824149912 instance=ExtResource("1_uwrxv")]
-position = Vector2(-54, -53)
+position = Vector2(44, 66)

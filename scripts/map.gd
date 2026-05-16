@@ -23,6 +23,8 @@ func _ready():
 
 
 func rebuild_collision_fast():
+	var start_usec := Time.get_ticks_usec()
+
 	# Nettoyage
 	for c in collision_polygons:
 		if is_instance_valid(c):
@@ -40,11 +42,14 @@ func rebuild_collision_fast():
 
 	for loop in loops:
 		var col := CollisionPolygon2D.new()
-		col.build_mode = CollisionPolygon2D.BUILD_SOLIDS
+		col.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
 		col.position = origin
 		col.polygon = loop
 		collisions_root.add_child(col)
 		collision_polygons.append(col)
+
+	var elapsed_ms := (Time.get_ticks_usec() - start_usec) / 1000.0
+	print("[MapCollision] rebuild=%.3f ms loops=%d polygons=%d" % [elapsed_ms, loops.size(), collision_polygons.size()])
 
 
 func is_solid(x: int, y: int) -> bool:
