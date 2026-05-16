@@ -7,11 +7,14 @@
 
 [node name="Game" type="Node2D" unique_id=690120446]
 
+[node name="Camera2D" type="Camera2D" parent="." unique_id=787287215]
+position = Vector2(7, -15)
+
 [node name="Map" parent="." unique_id=1785806001 instance=ExtResource("2_yqjtg")]
 position = Vector2(7, -15)
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=2090005021]
-position = Vector2(-50, 6)
+position = Vector2(191, -107)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D" unique_id=250070824]
 position = Vector2(121, -68)
@@ -19,8 +22,4 @@ rotation = -0.36804268
 shape = SubResource("CapsuleShape2D_yqjtg")
 
 [node name="Player" parent="." unique_id=1824149912 instance=ExtResource("1_uwrxv")]
-position = Vector2(-29, -43)
-
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=787287215]
-position = Vector2(-1, 3)
-zoom = Vector2(0.485, 0.485)
+position = Vector2(-54, -53)

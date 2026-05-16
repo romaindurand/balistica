@@ -1,13 +1,15 @@
 extends Node2D
 
+const MarchingSquares = preload("res://scripts/marching_squares.gd")
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collisions_root: CollisionObject2D = $StaticBody2D
 
 var image: Image
 var texture: ImageTexture
-var collision_cells: Dictionary = {}
+var collision_polygons: Array[CollisionPolygon2D] = []
 
-const STEP := 4
+const STEP := 3
 
 func _ready():
 	image = sprite.texture.get_image()
@@ -20,17 +22,21 @@ func _ready():
 
 func rebuild_collision_fast():
 	# Nettoyage
-	for c in collision_cells.values():
+	for c in collision_polygons:
 		if is_instance_valid(c):
 			c.queue_free()
-	collision_cells.clear()
+	collision_polygons.clear()
 
-	var w := image.get_width()
-	var h := image.get_height()
+	var origin := get_image_origin_offset()
+	var loops := MarchingSquares.build_loops_from_image(image, STEP)
 
-	for y in range(0, h, STEP):
-		for x in range(0, w, STEP):
-			update_cell_collision(x, y)
+	for loop in loops:
+		var col := CollisionPolygon2D.new()
+		col.build_mode = CollisionPolygon2D.BUILD_SOLIDS
+		col.position = origin
+		col.polygon = loop
+		collisions_root.add_child(col)
+		collision_polygons.append(col)
 
 
 func is_solid(x: int, y: int) -> bool:
@@ -49,43 +55,8 @@ func get_image_origin_offset() -> Vector2:
 	return origin
 
 
-func update_cell_collision(cell_x: int, cell_y: int):
-	var key := Vector2i(cell_x, cell_y)
-	var has_shape := collision_cells.has(key)
-	var solid := is_solid(cell_x, cell_y)
-
-	if solid and not has_shape:
-		var shape := RectangleShape2D.new()
-		shape.size = Vector2(STEP, STEP)
-
-		var col := CollisionShape2D.new()
-		col.shape = shape
-		col.position = get_image_origin_offset() + Vector2(cell_x + STEP * 0.5, cell_y + STEP * 0.5)
-
-		collisions_root.add_child(col)
-		collision_cells[key] = col
-	elif not solid and has_shape:
-		var col: CollisionShape2D = collision_cells[key]
-		if is_instance_valid(col):
-			col.queue_free()
-		collision_cells.erase(key)
-
-
-func update_collisions_in_rect(min_x: int, min_y: int, max_x: int, max_y: int):
-	if image.is_empty():
-		return
-
-	var w := image.get_width()
-	var h := image.get_height()
-
-	var start_x := maxi(0, int(floor(min_x / float(STEP))) * STEP)
-	var start_y := maxi(0, int(floor(min_y / float(STEP))) * STEP)
-	var end_x := mini(w - 1, int(floor(max_x / float(STEP))) * STEP)
-	var end_y := mini(h - 1, int(floor(max_y / float(STEP))) * STEP)
-
-	for y in range(start_y, end_y + 1, STEP):
-		for x in range(start_x, end_x + 1, STEP):
-			update_cell_collision(x, y)
+func update_collisions_in_rect(_min_x: int, _min_y: int, _max_x: int, _max_y: int):
+	rebuild_collision_fast()
 
 
 func destroy_circle(global_center: Vector2, radius: float):
