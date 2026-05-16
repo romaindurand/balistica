@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://4qwkd0go1qgu"]
 
 [ext_resource type="Texture2D" uid="uid://d4i4g5b1gn8r5" path="res://assets/Vehicles.png" id="1_3vyb7"]
+[ext_resource type="Script" uid="uid://bjdfl33uke50p" path="res://scripts/player.gd" id="1_g2els"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2els"]
 radius = 9.001617
 height = 34.003212
 
 [node name="Player" type="CharacterBody2D" unique_id=1824149912]
+script = ExtResource("1_g2els")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=807762240]
 rotation = -1.5691675
