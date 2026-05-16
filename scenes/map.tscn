@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://c04x1605wd0bi"]
+
+[ext_resource type="Texture2D" uid="uid://d8lcio1ioili" path="res://assets/map.png" id="1_4xfga"]
+[ext_resource type="Script" uid="uid://c5g4b8jq3xlq7" path="res://scripts/map.gd" id="1_paxxb"]
+
+[node name="Map" type="Node2D" unique_id=1785806001]
+script = ExtResource("1_paxxb")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2027805016]
+texture = ExtResource("1_4xfga")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=737112909]
+
+[node name="Collisions" type="Node2D" parent="StaticBody2D" unique_id=1131303413]

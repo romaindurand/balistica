@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://4qwkd0go1qgu"]
+
+[ext_resource type="Texture2D" uid="uid://d4i4g5b1gn8r5" path="res://assets/Vehicles.png" id="1_3vyb7"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2els"]
+radius = 9.001617
+height = 34.003212
+
+[node name="Player" type="CharacterBody2D" unique_id=1824149912]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=807762240]
+rotation = -1.5691675
+shape = SubResource("CapsuleShape2D_g2els")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1243589534]
+position = Vector2(1, -1)
+texture = ExtResource("1_3vyb7")
+region_enabled = true
+region_rect = Rect2(0, 44, 33, 19)
