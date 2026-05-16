@@ -7,6 +7,10 @@ const EDGE_BOTTOM := 2
 const EDGE_LEFT := 3
 
 static func build_loops_from_image(image: Image, step: int, alpha_threshold: float = 0.5) -> Array[PackedVector2Array]:
+	return build_loops_from_image_with_sampling(image, step, alpha_threshold, 3, 0.75)
+
+
+static func build_loops_from_image_with_sampling(image: Image, step: int, alpha_threshold: float = 0.5, sample_grid_size: int = 3, sample_radius_scale: float = 0.75) -> Array[PackedVector2Array]:
 	if image.is_empty() or step <= 0:
 		return []
 
@@ -14,14 +18,21 @@ static func build_loops_from_image(image: Image, step: int, alpha_threshold: flo
 	var height := image.get_height()
 	var grid_w := int(ceil(width / float(step)))
 	var grid_h := int(ceil(height / float(step)))
+	var sampling_grid := maxi(1, sample_grid_size)
+	var sampling_radius := maxf(0.5, step * sample_radius_scale)
 
 	var adjacency: Dictionary = {}
 	var segments: Dictionary = {}
+	var vertex_positions: Dictionary = {}
 
 	# On ajoute une bordure vide autour de la grille pour fermer les contours qui touchent les bords de l'image.
 	for cy in range(-1, grid_h):
 		for cx in range(-1, grid_w):
-			var case_id := _build_case_id(image, cx, cy, step, alpha_threshold)
+			var top_left := _sample_vertex_field(image, cx, cy, step, alpha_threshold, sampling_grid, sampling_radius)
+			var top_right := _sample_vertex_field(image, cx + 1, cy, step, alpha_threshold, sampling_grid, sampling_radius)
+			var bottom_right := _sample_vertex_field(image, cx + 1, cy + 1, step, alpha_threshold, sampling_grid, sampling_radius)
+			var bottom_left := _sample_vertex_field(image, cx, cy + 1, step, alpha_threshold, sampling_grid, sampling_radius)
+			var case_id := _build_case_id(top_left, top_right, bottom_right, bottom_left, alpha_threshold)
 			if case_id == 0 or case_id == 15:
 				continue
 
@@ -29,30 +40,49 @@ static func build_loops_from_image(image: Image, step: int, alpha_threshold: flo
 			for edge_pair in case_segments:
 				var p0: Vector2i = _edge_midpoint(cx, cy, edge_pair[0])
 				var p1: Vector2i = _edge_midpoint(cx, cy, edge_pair[1])
+				vertex_positions[p0] = _interpolate_edge_position(cx, cy, edge_pair[0], step, alpha_threshold, top_left, top_right, bottom_right, bottom_left)
+				vertex_positions[p1] = _interpolate_edge_position(cx, cy, edge_pair[1], step, alpha_threshold, top_left, top_right, bottom_right, bottom_left)
 				_add_segment(p0, p1, adjacency, segments)
 
-	return _trace_loops(adjacency, segments, step)
+	return _trace_loops(adjacency, segments, vertex_positions, step)
 
 
-static func _build_case_id(image: Image, cell_x: int, cell_y: int, step: int, alpha_threshold: float) -> int:
-	var top_left := _is_solid_vertex(image, cell_x, cell_y, step, alpha_threshold)
-	var top_right := _is_solid_vertex(image, cell_x + 1, cell_y, step, alpha_threshold)
-	var bottom_right := _is_solid_vertex(image, cell_x + 1, cell_y + 1, step, alpha_threshold)
-	var bottom_left := _is_solid_vertex(image, cell_x, cell_y + 1, step, alpha_threshold)
-
-	return (int(top_left) << 3) | (int(top_right) << 2) | (int(bottom_right) << 1) | int(bottom_left)
+static func _build_case_id(top_left: float, top_right: float, bottom_right: float, bottom_left: float, alpha_threshold: float) -> int:
+	return (int(top_left > alpha_threshold) << 3) | (int(top_right > alpha_threshold) << 2) | (int(bottom_right > alpha_threshold) << 1) | int(bottom_left > alpha_threshold)
 
 
-static func _is_solid_vertex(image: Image, vx: int, vy: int, step: int, alpha_threshold: float) -> bool:
-	var px := vx * step
-	var py := vy * step
+static func _sample_vertex_field(image: Image, vx: int, vy: int, step: int, alpha_threshold: float, sample_grid_size: int, sample_radius: float) -> float:
+	var center := Vector2(vx * step, vy * step)
+	if sample_grid_size <= 1:
+		return _sample_binary(image, center, alpha_threshold)
+
+	var total := 0.0
+	var sample_count := 0
+	var span := sample_radius * 2.0
+
+	for sy in range(sample_grid_size):
+		var offset_y := -sample_radius + span * (sy / float(sample_grid_size - 1))
+		for sx in range(sample_grid_size):
+			var offset_x := -sample_radius + span * (sx / float(sample_grid_size - 1))
+			total += _sample_binary(image, center + Vector2(offset_x, offset_y), alpha_threshold)
+			sample_count += 1
+
+	if sample_count == 0:
+		return 0.0
+
+	return total / sample_count
+
+
+static func _sample_binary(image: Image, position: Vector2, alpha_threshold: float) -> float:
+	var px := int(round(position.x))
+	var py := int(round(position.y))
 
 	if px < 0 or py < 0:
-		return false
+		return 0.0
 	if px >= image.get_width() or py >= image.get_height():
-		return false
+		return 0.0
 
-	return image.get_pixel(px, py).a > alpha_threshold
+	return 1.0 if image.get_pixel(px, py).a > alpha_threshold else 0.0
 
 
 static func _segments_for_case(case_id: int, cell_x: int, cell_y: int) -> Array:
@@ -110,6 +140,29 @@ static func _edge_midpoint(cell_x: int, cell_y: int, edge_id: int) -> Vector2i:
 			return Vector2i(hx, hy)
 
 
+static func _interpolate_edge_position(cell_x: int, cell_y: int, edge_id: int, step: int, alpha_threshold: float, top_left: float, top_right: float, bottom_right: float, bottom_left: float) -> Vector2:
+	var origin := Vector2(cell_x * step, cell_y * step)
+
+	match edge_id:
+		EDGE_TOP:
+			return origin + Vector2(_interpolation_factor(top_left, top_right, alpha_threshold) * step, 0.0)
+		EDGE_RIGHT:
+			return origin + Vector2(step, _interpolation_factor(top_right, bottom_right, alpha_threshold) * step)
+		EDGE_BOTTOM:
+			return origin + Vector2(_interpolation_factor(bottom_left, bottom_right, alpha_threshold) * step, step)
+		EDGE_LEFT:
+			return origin + Vector2(0.0, _interpolation_factor(top_left, bottom_left, alpha_threshold) * step)
+		_:
+			return origin
+
+
+static func _interpolation_factor(a: float, b: float, threshold: float) -> float:
+	var delta := b - a
+	if absf(delta) <= 0.00001:
+		return 0.5
+	return clampf((threshold - a) / delta, 0.0, 1.0)
+
+
 static func _add_segment(p0: Vector2i, p1: Vector2i, adjacency: Dictionary, segments: Dictionary):
 	if p0 == p1:
 		return
@@ -148,7 +201,7 @@ static func _vec_less_or_equal(a: Vector2i, b: Vector2i) -> bool:
 	return a.y <= b.y
 
 
-static func _trace_loops(adjacency: Dictionary, segments: Dictionary, step: int) -> Array[PackedVector2Array]:
+static func _trace_loops(adjacency: Dictionary, segments: Dictionary, vertex_positions: Dictionary, step: int) -> Array[PackedVector2Array]:
 	var loops: Array[PackedVector2Array] = []
 	var visited: Dictionary = {}
 	var segment_keys: Array = segments.keys()
@@ -191,7 +244,7 @@ static func _trace_loops(adjacency: Dictionary, segments: Dictionary, step: int)
 
 		# On supprime le dernier point identique au premier; CollisionPolygon2D ferme déjà la boucle.
 		loop_vertices.pop_back()
-		var polygon := _to_polygon(loop_vertices, step)
+		var polygon := _to_polygon(loop_vertices, vertex_positions, step)
 		if polygon.size() >= 3:
 			loops.append(polygon)
 
@@ -220,8 +273,11 @@ static func _pick_next_vertex(previous_vertex: Vector2i, current_vertex: Vector2
 	return Vector2i(2147483647, 2147483647)
 
 
-static func _to_polygon(vertices: Array[Vector2i], step: int) -> PackedVector2Array:
+static func _to_polygon(vertices: Array[Vector2i], vertex_positions: Dictionary, step: int) -> PackedVector2Array:
 	var polygon := PackedVector2Array()
 	for v in vertices:
-		polygon.append(Vector2(v.x * step * 0.5, v.y * step * 0.5))
+		if vertex_positions.has(v):
+			polygon.append(vertex_positions[v])
+		else:
+			polygon.append(Vector2(v.x * step * 0.5, v.y * step * 0.5))
 	return polygon

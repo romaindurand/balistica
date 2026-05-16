@@ -9,7 +9,9 @@ var image: Image
 var texture: ImageTexture
 var collision_polygons: Array[CollisionPolygon2D] = []
 
-const STEP := 3
+const STEP := 5
+const SAMPLING_GRID_SIZE := 3
+const SAMPLING_RADIUS_SCALE := 0.75
 
 func _ready():
 	image = sprite.texture.get_image()
@@ -28,7 +30,13 @@ func rebuild_collision_fast():
 	collision_polygons.clear()
 
 	var origin := get_image_origin_offset()
-	var loops := MarchingSquares.build_loops_from_image(image, STEP)
+	var loops := MarchingSquares.build_loops_from_image_with_sampling(
+		image,
+		STEP,
+		0.5,
+		SAMPLING_GRID_SIZE,
+		SAMPLING_RADIUS_SCALE
+	)
 
 	for loop in loops:
 		var col := CollisionPolygon2D.new()
