@@ -1,5 +1,14 @@
 [gd_scene format=3 uid="uid://kmxsgjidxd16"]
 
+[ext_resource type="Script" uid="uid://bf3qpxcndq2ug" path="res://scripts/hud.gd" id="1_r8yg0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ahhtf"]
+bg_color = Color(0.18039216, 0.18039216, 0.18039216, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [node name="HUD" type="Control" unique_id=1738403872]
 layout_mode = 3
 anchors_preset = 15
@@ -7,6 +16,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_r8yg0")
 
 [node name="Panel2" type="Panel" parent="." unique_id=954144978]
 layout_mode = 1
@@ -50,18 +60,32 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Angle" type="Line2D" parent="Panel" unique_id=716349300]
-points = PackedVector2Array(27, 25, 50, 25)
+points = PackedVector2Array(27, 25, 51, 25)
 width = 2.0
+
+[node name="Panel" type="Panel" parent="Panel" unique_id=243539458]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.300003
+offset_top = 13.000015
+offset_right = -14.300003
+offset_bottom = -12.999985
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ahhtf")
 
 [node name="Label" type="Label" parent="Panel" unique_id=1727932128]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.63600004
-anchor_top = 0.020000001
-anchor_right = 0.98200005
-anchor_bottom = 0.48000002
-offset_left = 25.019997
-offset_top = 3.0
-offset_right = 24.989998
-offset_bottom = 3.0
+anchor_left = 0.25500003
+anchor_top = 0.26000002
+anchor_right = 0.74500006
+anchor_bottom = 0.74
+offset_left = -0.025001526
+offset_right = 0.024997711
+theme_override_font_sizes/font_size = 13
 text = "45"
+horizontal_alignment = 1
+vertical_alignment = 1

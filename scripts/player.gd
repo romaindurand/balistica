@@ -1,6 +1,8 @@
 extends RigidBody2D
 
 
+signal angle_changed(angle_degrees: float, facing_right: bool)
+
 const DEFAULT_SUSPENSION_STIFFNESS := 90.0
 const DEFAULT_SUSPENSION_DAMPING := 9.0
 const DEFAULT_MAX_SUSPENSION_FORCE := 200.0
@@ -27,10 +29,13 @@ var _wheel_rest_positions: Dictionary = {}
 var _wheel_assemblies_by_wheel: Dictionary = {}
 var _idle_time: float = 0.0
 var _hull_frozen: bool = false
+var _facing_right: bool = true
 
 
 func _ready() -> void:
 	_collect_wheels()
+	_facing_right = not $Sprite2D.flip_h
+	call_deferred("_emit_current_angle")
 
 
 func _physics_process(delta: float) -> void:
@@ -39,9 +44,9 @@ func _physics_process(delta: float) -> void:
 
 
 	var input_axis: float = Input.get_axis("move_left", "move_right")
-	# handle flipping sprite based on player input direction
 	if not is_zero_approx(input_axis):
-		$Sprite2D.flip_h = input_axis < 0.0
+		_facing_right = input_axis > 0.0
+	$Sprite2D.flip_h = not _facing_right
 	var target_speed: float = input_axis * wheel_target_angular_speed * wheel_direction
 	var has_input: bool = not is_zero_approx(input_axis)
 	var grounded_wheel_count: int = _get_grounded_wheel_count()
@@ -72,6 +77,7 @@ func _physics_process(delta: float) -> void:
 			_apply_wheel_suspension(wheel)
 
 	angular_damp = hull_angular_damp_when_grounded
+	_emit_current_angle()
 
 
 func _collect_wheels() -> void:
@@ -154,3 +160,20 @@ func _get_float_setting(source: Node, property_name: StringName, fallback: float
 	if typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
 		return float(value)
 	return fallback
+
+
+func is_facing_right() -> bool:
+	return _facing_right
+
+
+func get_signed_aim_angle_degrees() -> float:
+	var reference_direction: Vector2 = Vector2.RIGHT if _facing_right else Vector2.LEFT
+	var forward_direction: Vector2 = global_transform.x if _facing_right else -global_transform.x
+	var signed_angle: float = rad_to_deg(reference_direction.angle_to(forward_direction))
+	if _facing_right:
+		signed_angle = -signed_angle
+	return signed_angle
+
+
+func _emit_current_angle() -> void:
+	angle_changed.emit(get_signed_aim_angle_degrees(), _facing_right)
