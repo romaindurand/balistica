@@ -2,20 +2,38 @@
 
 [ext_resource type="Texture2D" uid="uid://d4i4g5b1gn8r5" path="res://assets/Vehicles.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://bjdfl33uke50p" path="res://scripts/player.gd" id="1_g2els"]
+[ext_resource type="PackedScene" uid="uid://d3st441egx6ks" path="res://scenes/wheel_assembly.tscn" id="3_hlq4g"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2els"]
-radius = 9.001617
-height = 34.003212
+radius = 5.9999924
+height = 25.999966
 
-[node name="Player" type="CharacterBody2D" unique_id=1824149912]
+[node name="Player" type="RigidBody2D" unique_id=1824149912]
+center_of_mass_mode = 1
+center_of_mass = Vector2(0, 10)
+linear_damp = 0.08
+angular_damp = 2.0
 script = ExtResource("1_g2els")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=807762240]
-rotation = -1.5691675
-shape = SubResource("CapsuleShape2D_g2els")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1243589534]
 position = Vector2(1, -1)
 texture = ExtResource("1_3vyb7")
 region_enabled = true
 region_rect = Rect2(0, 44, 33, 19)
+
+[node name="WheelAssembly1" parent="." unique_id=1176606743 instance=ExtResource("3_hlq4g")]
+position = Vector2(-13, 7)
+
+[node name="WheelAssembly2" parent="." unique_id=1818385092 instance=ExtResource("3_hlq4g")]
+position = Vector2(-5, 8)
+
+[node name="WheelAssembly3" parent="." unique_id=829358662 instance=ExtResource("3_hlq4g")]
+position = Vector2(5, 8)
+
+[node name="WheelAssembly4" parent="." unique_id=791387287 instance=ExtResource("3_hlq4g")]
+position = Vector2(13, 7)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=807762240]
+position = Vector2(0, -1)
+rotation = -1.5691675
+shape = SubResource("CapsuleShape2D_g2els")

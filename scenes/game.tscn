@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://4qwkd0go1qgu" path="res://scenes/player.tscn" id="1_uwrxv"]
 [ext_resource type="PackedScene" uid="uid://c04x1605wd0bi" path="res://scenes/map.tscn" id="2_yqjtg"]
+[ext_resource type="PackedScene" uid="uid://kmxsgjidxd16" path="res://scenes/hud.tscn" id="3_lnu2h"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yqjtg"]
 
@@ -14,12 +15,24 @@ position = Vector2(7, -15)
 position = Vector2(7, -15)
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=2090005021]
-position = Vector2(191, -107)
+position = Vector2(271, -78)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D" unique_id=250070824]
-position = Vector2(121, -68)
-rotation = -0.36804268
 shape = SubResource("CapsuleShape2D_yqjtg")
 
+[node name="Polygon2D" type="Polygon2D" parent="RigidBody2D" unique_id=424208634]
+polygon = PackedVector2Array(-5, -14, -3, -15, 0, -15, 3, -15, 5, -14, 7, -12, 9, -10, 10, -8, 10, -5, 10, 5, 10, 8, 9, 10, 7, 12, 5, 14, 3, 15, 0, 15, -3, 15, -5, 14, -7, 12, -9, 10, -10, 8, -10, 5, -10, -5, -10, -8, -9, -10, -7, -12)
+
 [node name="Player" parent="." unique_id=1824149912 instance=ExtResource("1_uwrxv")]
-position = Vector2(44, 66)
+position = Vector2(-27, -45)
+
+[node name="HUD" parent="." unique_id=1738403872 instance=ExtResource("3_lnu2h")]
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = -313.0
+offset_top = -195.0
+offset_right = 327.0
+offset_bottom = 165.0
+grow_horizontal = 1
+grow_vertical = 1

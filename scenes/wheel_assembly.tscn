@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://d3st441egx6ks"]
+
+[ext_resource type="Script" uid="uid://dxrbpof334c4w" path="res://scripts/wheel_assembly.gd" id="1_script"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_wheel"]
+friction = 20.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_wheel"]
+radius = 5.0
+
+[node name="WheelAssembly" type="Node2D" unique_id=1571713855]
+position = Vector2(0, 2)
+script = ExtResource("1_script")
+suspension_enabled = true
+
+[node name="Wheel" type="RigidBody2D" parent="." unique_id=87151320]
+position = Vector2(0, -2)
+collision_layer = 4
+mass = 0.7
+physics_material_override = SubResource("PhysicsMaterial_wheel")
+contact_monitor = true
+max_contacts_reported = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wheel" unique_id=1587618080]
+shape = SubResource("CircleShape2D_wheel")
+
+[node name="WheelJoint" type="GrooveJoint2D" parent="." unique_id=954822172]
+position = Vector2(0, -7)
+node_a = NodePath("../..")
+node_b = NodePath("../Wheel")
+length = 10.0
+initial_offset = 5.0
