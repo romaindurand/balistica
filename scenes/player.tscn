@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://d4i4g5b1gn8r5" path="res://assets/Vehicles.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://bjdfl33uke50p" path="res://scripts/player.gd" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://d3st441egx6ks" path="res://scenes/wheel_assembly.tscn" id="3_hlq4g"]
+[ext_resource type="PackedScene" uid="uid://24krxex3a4oj" path="res://scenes/aim.tscn" id="4_opbas"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2els"]
 radius = 5.9999924
@@ -14,12 +15,16 @@ center_of_mass = Vector2(0, 10)
 linear_damp = 0.08
 angular_damp = 2.0
 script = ExtResource("1_g2els")
+aim_angle_adjustment_speed = 20.0
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1243589534]
 position = Vector2(1, -1)
 texture = ExtResource("1_3vyb7")
 region_enabled = true
 region_rect = Rect2(0, 44, 33, 19)
+
+[node name="Aim" parent="." unique_id=1364671572 instance=ExtResource("4_opbas")]
+position = Vector2(0, -5)
 
 [node name="WheelAssembly1" parent="." unique_id=1176606743 instance=ExtResource("3_hlq4g")]
 position = Vector2(-13, 7)
@@ -37,3 +42,5 @@ position = Vector2(13, 7)
 position = Vector2(0, -1)
 rotation = -1.5691675
 shape = SubResource("CapsuleShape2D_g2els")
+
+[connection signal="aim_angles_changed" from="." to="Aim" method="update_aim_angles"]
