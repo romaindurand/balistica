@@ -24,7 +24,7 @@ region_enabled = true
 region_rect = Rect2(0, 44, 33, 19)
 
 [node name="Aim" parent="." unique_id=1364671572 instance=ExtResource("4_opbas")]
-position = Vector2(0, -5)
+position = Vector2(0, -7)
 
 [node name="WheelAssembly1" parent="." unique_id=1176606743 instance=ExtResource("3_hlq4g")]
 position = Vector2(-13, 7)

@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://4qwkd0go1qgu" path="res://scenes/player.tscn" id="1_uwrxv"]
 [ext_resource type="PackedScene" uid="uid://c04x1605wd0bi" path="res://scenes/map.tscn" id="2_yqjtg"]
 [ext_resource type="PackedScene" uid="uid://kmxsgjidxd16" path="res://scenes/hud.tscn" id="3_lnu2h"]
+[ext_resource type="PackedScene" uid="uid://c2g3r5h6qqi68" path="res://scenes/bullet.tscn" id="4_lbhrr"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yqjtg"]
 
@@ -36,5 +37,8 @@ grow_vertical = 1
 
 [node name="Player" parent="." unique_id=1824149912 instance=ExtResource("1_uwrxv")]
 position = Vector2(-49, -45)
+
+[node name="Bullet" parent="." unique_id=1059371878 instance=ExtResource("4_lbhrr")]
+position = Vector2(-177, -606)
 
 [connection signal="angle_changed" from="Player" to="HUD" method="update_player_angle"]

@@ -12,16 +12,16 @@ colors = PackedColorArray(1, 0, 0, 0, 1, 0, 0, 0.2784314)
 script = ExtResource("1_xfe1s")
 
 [node name="UpperLimit" type="Line2D" parent="." unique_id=55624000]
-points = PackedVector2Array(-1, 0, 62, -54)
+points = PackedVector2Array(-1, 0, 37, -17)
 width = 1.0
 gradient = SubResource("Gradient_nl3fy")
 
 [node name="LowerLimit" type="Line2D" parent="." unique_id=2095720238]
-points = PackedVector2Array(-1, 0, 44, 0)
+points = PackedVector2Array(-1, 0, 37, 17)
 width = 1.0
 gradient = SubResource("Gradient_nl3fy")
 
 [node name="CurrentAim" type="Line2D" parent="." unique_id=721388228]
-points = PackedVector2Array(0, 0, 40, -16)
+points = PackedVector2Array(0, 0, 41, 0)
 width = 2.0
 gradient = SubResource("Gradient_bvxim")
