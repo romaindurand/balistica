@@ -26,6 +26,7 @@ const DEFAULT_MAX_SUSPENSION_FORCE := 200.0
 @export var min_grounded_wheels_to_freeze: int = 2
 @export var wheel_idle_brake_enabled: bool = true
 @export var wheel_idle_brake_torque: float = 2000.0
+@export var map_collision_wheel_wake_size: Vector2 = Vector2(24.0, 24.0)
 
 @export_group("Aim")
 @export var aim_angle_adjustment_speed: float = 45.0
@@ -46,6 +47,7 @@ var custom_aim_angle_degrees: float = 0.0
 func _ready() -> void:
 	_collect_wheels()
 	_facing_right = not $Sprite2D.flip_h
+	call_deferred("_connect_destructible_maps")
 	call_deferred("_emit_current_angle")
 
 
@@ -123,6 +125,37 @@ func _set_hull_frozen(value: bool) -> void:
 			wheel.linear_velocity = Vector2.ZERO
 			wheel.angular_velocity = 0.0
 	freeze = value
+
+
+func _connect_destructible_maps() -> void:
+	var callback := Callable(self, "_on_map_collisions_changed")
+	for map in get_tree().get_nodes_in_group("destructible_maps"):
+		if map.has_signal(&"collisions_changed") and not map.is_connected(&"collisions_changed", callback):
+			map.connect(&"collisions_changed", callback)
+
+
+func _on_map_collisions_changed(changed_global_rect: Rect2) -> void:
+	if not _hull_frozen:
+		return
+	if not _changed_rect_overlaps_wheel_support(changed_global_rect):
+		return
+
+	_idle_time = 0.0
+	_set_hull_frozen(false)
+
+
+func _changed_rect_overlaps_wheel_support(changed_global_rect: Rect2) -> bool:
+	if _wheels.is_empty():
+		_collect_wheels()
+
+	for wheel in _wheels:
+		if is_instance_valid(wheel) and changed_global_rect.intersects(_get_wheel_collision_wake_rect(wheel)):
+			return true
+	return false
+
+
+func _get_wheel_collision_wake_rect(wheel: RigidBody2D) -> Rect2:
+	return Rect2(wheel.global_position - map_collision_wheel_wake_size * 0.5, map_collision_wheel_wake_size)
 
 
 func _get_grounded_wheel_count() -> int:

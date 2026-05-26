@@ -2,6 +2,8 @@ extends Node2D
 
 const MarchingSquaresScene = preload("res://scripts/marching_squares.gd")
 
+signal collisions_changed(changed_global_rect: Rect2)
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collisions_root: CollisionObject2D = $StaticBody2D
 
@@ -17,6 +19,8 @@ const SAMPLING_GRID_SIZE := 3
 const SAMPLING_RADIUS_SCALE := 0.75
 
 func _ready():
+	add_to_group("destructible_maps")
+
 	image = sprite.texture.get_image()
 
 	texture = ImageTexture.create_from_image(image)
@@ -85,6 +89,7 @@ func destroy_circle(global_center: Vector2, radius: float):
 
 	texture.update(image)
 	update_collisions_in_rect(min_x, min_y, max_x, max_y)
+	collisions_changed.emit(_image_rect_to_global_rect(Rect2i(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)))
 
 
 func _clear_all_collision_polygons():
@@ -109,6 +114,27 @@ func _get_chunk_sample_rect(chunk: Vector2i) -> Rect2i:
 	var max_x := clampi(chunk_origin.x + COLLISION_CHUNK_SIZE + COLLISION_CHUNK_MARGIN, 0, image.get_width())
 	var max_y := clampi(chunk_origin.y + COLLISION_CHUNK_SIZE + COLLISION_CHUNK_MARGIN, 0, image.get_height())
 	return Rect2i(min_x, min_y, max_x - min_x, max_y - min_y)
+
+
+func _image_rect_to_global_rect(image_rect: Rect2i) -> Rect2:
+	var local_position := Vector2(image_rect.position) + get_image_origin_offset()
+	var local_size := Vector2(image_rect.size)
+	var corners := [
+		to_global(local_position),
+		to_global(local_position + Vector2(local_size.x, 0.0)),
+		to_global(local_position + Vector2(0.0, local_size.y)),
+		to_global(local_position + local_size)
+	]
+	var min_position: Vector2 = corners[0]
+	var max_position: Vector2 = corners[0]
+
+	for corner in corners:
+		min_position.x = minf(min_position.x, corner.x)
+		min_position.y = minf(min_position.y, corner.y)
+		max_position.x = maxf(max_position.x, corner.x)
+		max_position.y = maxf(max_position.y, corner.y)
+
+	return Rect2(min_position, max_position - min_position)
 
 
 func _remove_collision_chunk(chunk: Vector2i):
