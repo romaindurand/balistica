@@ -20,6 +20,7 @@ func _ready() -> void:
 	update_player_angle(0.0, true)
 
 
+
 func update_player_angle(angle_degrees: float, facing_right: bool) -> void:
 	var base_direction: Vector2 = Vector2.RIGHT if facing_right else Vector2.LEFT
 	var visual_angle_degrees: float = -angle_degrees if facing_right else angle_degrees

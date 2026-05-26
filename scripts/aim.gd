@@ -5,6 +5,8 @@ const DEFAULT_LINE_LENGTH := 40.0
 
 
 @export var aim_line_length: float = DEFAULT_LINE_LENGTH
+@export var min_custom_angle_degrees: float = -20.0
+@export var max_custom_angle_degrees: float = 20.0
 
 @onready var upper_limit_line: Line2D = $UpperLimit
 @onready var lower_limit_line: Line2D = $LowerLimit
@@ -26,23 +28,22 @@ func _ready() -> void:
 func update_aim_angles(
 	vehicle_angle_degrees: float,
 	current_angle_degrees: float,
-	max_custom_angle_degrees: float,
+	_max_custom_angle_degrees: float,
 	facing_right: bool
 ) -> void:
-	var max_angle: float = absf(max_custom_angle_degrees)
 	var custom_angle_degrees: float = current_angle_degrees - vehicle_angle_degrees
 	_redraw_line(
 		upper_limit_line,
 		_upper_limit_origin,
 		aim_line_length,
-		max_angle,
+		max_custom_angle_degrees,
 		facing_right
 	)
 	_redraw_line(
 		lower_limit_line,
 		_lower_limit_origin,
 		aim_line_length,
-		-max_angle,
+		min_custom_angle_degrees,
 		facing_right
 	)
 	_redraw_line(

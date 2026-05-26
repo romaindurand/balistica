@@ -18,7 +18,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_r8yg0")
 
-[node name="Panel2" type="Panel" parent="." unique_id=954144978]
+[node name="ChargePanel" type="Panel" parent="." unique_id=954144978]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.089
@@ -32,7 +32,7 @@ offset_bottom = 0.16000366
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="Panel2" unique_id=469253964]
+[node name="Charge" type="ColorRect" parent="ChargePanel" unique_id=469253964]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.009000001

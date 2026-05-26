@@ -230,18 +230,41 @@ func _update_custom_aim_angle(delta: float) -> void:
 	if is_zero_approx(aim_axis):
 		return
 
-	var max_angle: float = absf(max_custom_aim_angle_degrees)
+	var aim_limits := _get_custom_aim_angle_limits()
 	custom_aim_angle_degrees = clampf(
 		custom_aim_angle_degrees + aim_axis * aim_angle_adjustment_speed * delta,
-		-max_angle,
-		max_angle
+		aim_limits.x,
+		aim_limits.y
 	)
+
+
+func _get_custom_aim_angle_limits() -> Vector2:
+	var fallback_max_angle := absf(max_custom_aim_angle_degrees)
+	var min_angle := -fallback_max_angle
+	var max_angle := fallback_max_angle
+	var aim_node := get_node_or_null("Aim")
+
+	if aim_node != null:
+		var min_value: Variant = aim_node.get(&"min_custom_angle_degrees")
+		var max_value: Variant = aim_node.get(&"max_custom_angle_degrees")
+		if typeof(min_value) == TYPE_FLOAT or typeof(min_value) == TYPE_INT:
+			min_angle = float(min_value)
+		if typeof(max_value) == TYPE_FLOAT or typeof(max_value) == TYPE_INT:
+			max_angle = float(max_value)
+
+	if min_angle > max_angle:
+		var swap := min_angle
+		min_angle = max_angle
+		max_angle = swap
+
+	return Vector2(min_angle, max_angle)
 
 
 func _emit_current_angle() -> void:
 	var vehicle_angle_degrees: float = get_signed_aim_angle_degrees()
 	var current_angle_degrees: float = vehicle_angle_degrees + custom_aim_angle_degrees
-	var max_custom_angle_degrees: float = absf(max_custom_aim_angle_degrees)
+	var aim_limits := _get_custom_aim_angle_limits()
+	var max_custom_angle_degrees: float = maxf(absf(aim_limits.x), absf(aim_limits.y))
 	angle_changed.emit(current_angle_degrees, _facing_right)
 	aim_angles_changed.emit(
 		vehicle_angle_degrees,
